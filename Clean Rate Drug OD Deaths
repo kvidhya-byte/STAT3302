@@ -1,0 +1,41 @@
+library(readxl)
+od <- read_excel("Overdose_data_1999-2020_1.5.22.xlsx", "Rate Drug OD Deaths")
+od_clean <- od[5:nrow(od),]
+od_clean <- od_clean[,1:(ncol(od_clean)-2)]
+
+od_rowname <- c("Total Overdose Deaths", "Total Overdose Deaths Female", "Total Overdose Deaths Male",
+                "Any Opioid1", "Any Opioid1 Female", "Any Opioid1 Male", "Prescription Opioids2", "Prescription Opioids2 Female",
+                "Prescription Opioids2 Male", "Prescription Opioids AND Synthetic Opioids other than Methadone",
+                "Prescription Opioids WITHOUT Synthetic Opioids other than Methadone",
+                "Synthetic Opioids other than Methadone", "Synthetic Opioids other than Methadone Female",
+                "Synthetic Opioids other than Methadone Male", "Heroin", "Heroin Female", "Heroin Male",
+                "Cocaine", "Cocaine Female", "Cocaine Male", "Cocaine AND Any Opioid", "Cocaine AND Any Opioid Female",
+                "Cocaine AND Any Opioid Male", "Cocaine WITHOUT Any Opioid", "Cocaine WITHOUT Any Opioid Female", 
+                "Cocaine WITHOUT Any Opioid Male", "Psychostimulants With Abuse Potential",
+                "Psychostimulants With Abuse Potential Female", "Psychostimulants With Abuse Potential Male",
+                "Psychostimulants With Abuse Potential AND Any Opioid", "Psychostimulants With Abuse Potential WITHOUT Any Opioid",
+                "Psychostimulants With Abuse Potential WITHOUT Any Opioid Female",
+                "Psychostimulants With Abuse Potential WITHOUT Any Opioid Male", "Benzodiazepines", "Benzodiazepines Female",
+                "Benzodiazepines Male", "Benzodiazepines AND Any Opioid", "Benzodiazepines AND Any Opioid Female",
+                "Benzodiazepines AND Any Opioid Male", "Benzodiazepines WITHOUT Any Opioid",
+                "Benzodiazepines WITHOUT Any Opioid Female", "Benzodiazepines WITHOUT Any Opioid Male",
+                "Antidepressants", "Antidepressants Female", "Antidepressants Male", "Antidepressants AND Any Opioid",
+                "Antidepressants AND Any Opioid Female", "Antidepressants AND Any Opioid Male",
+                "Antidepressants WITHOUT Any Opioid",
+                "Antidepressants WITHOUT Any Opioid Female", "Antidepressants WITHOUT Any Opioid Male")
+
+od_temp1 <- od_clean[1:11,]
+od_temp2 <- od_clean[14,]
+od_temp3 <- od_clean[17:22,]
+od_temp4 <- od_clean[29:37,]
+od_temp5 <- od_clean[44:47,]
+od_temp6 <- od_clean[50:52,]
+od_temp7 <- od_clean[59:67,]
+od_temp8 <- od_clean[74:82,]
+
+od_clean <- rbind(od_temp1,od_temp2,od_temp3,od_temp4,od_temp5,od_temp6,od_temp7,od_temp8)
+od_clean <- od_clean[,2:ncol(od_clean)]
+od_colname <- as.numeric(od_clean[1,])
+od_clean <- od_clean[2:nrow(od_clean),]
+colnames(od_clean) <- od_colname
+rownames(od_clean) <- od_rowname
