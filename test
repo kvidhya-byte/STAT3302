@@ -1,0 +1,9 @@
+years <- od_colname
+total_od_death <- as.numeric(od_clean[c("Total Overdose Deaths"),])
+
+od_clean$Years
+
+fit_total<-glm(total_od_death~years)
+
+plot(years,total_od_death)
+summary(fit1)
