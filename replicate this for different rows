@@ -1,0 +1,20 @@
+#Total overdose Death rate in hundred thousands
+years <- od_colname
+total_od_death <- as.numeric(od_clean[c("Total Overdose Deaths"),])
+
+fit_total<-glm(total_od_death~years)
+
+temp<-summary(fit_total)$coefficients
+beta.est <- temp["years", "Estimate"]
+total.est <- exp(beta.est)
+total.est
+
+beta.ci <- c(temp["years", "Estimate"] - 1.96*temp["years", "Std. Error"],temp["years", "Estimate"] +1.96*temp["years", "Std. Error"])
+test.ci <- exp(beta.ci)
+test.ci
+
+plot(years,total_od_death)
+abline(fit_total$coefficients[1],fit_total$coefficients[2], col = "red", lwd = 2)
+#We would then interpret: for every year, we observe that the the
+#odds that the death rate of Drug Overdose in hundred thousands increase 2.03 times. 
+#(95% CI 2.032417, 2.626191).
