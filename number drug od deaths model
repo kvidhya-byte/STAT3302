@@ -1,0 +1,74 @@
+od2 <- read_excel("Overdose_data_1999-2020_1.5.22.xlsx", "Number Drug OD Deaths")
+
+od2_clean <- od2[5:nrow(od),]
+od2_clean <- od2_clean[,1:(ncol(od2_clean)-1)]
+
+od2_rowname <- c("Total Overdose Deaths", "Total Overdose Deaths Female", "Total Overdose Deaths Male",
+                "Any Opioid", "Any Opioid Female", "Any Opioid Male", "Heroin", "Heroin Female", "Heroin Male",
+                "Cocaine", "Cocaine Female", "Cocaine Male", "Benzodiazepines", "Benzodiazepines Female",
+                "Benzodiazepines Male", "Antidepressants", "Antidepressants Female", "Antidepressants Male")
+
+od2_temp1 <- od2_clean[1:7,]
+od2_temp2 <- od2_clean[21:23,]
+od2_temp3 <- od2_clean[30:32,]
+od2_temp4 <- od2_clean[60:62,]
+od2_temp5 <- od2_clean[75:77,]
+
+od2_clean <- rbind(od2_temp1,od2_temp2,od2_temp3,od2_temp4,od2_temp5)
+od2_clean <- od2_clean[,2:ncol(od2_clean)]
+od2_colname <- as.numeric(od2_clean[1,])
+od2_clean <- od2_clean[2:nrow(od2_clean),]
+colnames(od2_clean) <- od2_colname
+rownames(od2_clean) <- od2_rowname
+
+library("nnet")
+library(MASS)
+years <- od_colname
+male <- rep(0,length(years))
+female <- rep(1,length(years))
+
+#1=Heroin 2=Cocaine 3=Antidepressants
+h_male <- cbind(rep(1,length(years)),years,male,as.numeric(od2_clean[c("Heroin Male"),]))
+h_female <- cbind(rep(1,length(years)),years,female,as.numeric(od2_clean[c("Heroin Female"),]))
+c_male <- cbind(rep(2,length(years)),years,male,as.numeric(od2_clean[c("Cocaine Male"),]))
+c_female <- cbind(rep(2,length(years)),years,female,as.numeric(od2_clean[c("Cocaine Female"),]))
+a_male <- cbind(rep(3,length(years)),years,male,as.numeric(od2_clean[c("Antidepressants Male"),]))
+a_female <- cbind(rep(3,length(years)),years,female,as.numeric(od2_clean[c("Antidepressants Female"),]))
+
+
+test1 <- data.frame(rbind(h_male,h_female,c_male,c_female,a_male,a_female))
+colnames(test1) <- c("Drug", "Year", "Female", "Deaths")
+
+test1$Year <- factor(test1$Year)
+model.c_v_a <- polr(Year~Drug+Female, data=test1)
+summary(model.c_v_a)
+
+
+#######from hw3 q2 solution########
+#So, the interpretation is: Patients undergoing alternating treatment have odds of having a better
+#disease response that are estimated to be e
+#−0.5806817 = 0.5595 times those of patients undergoing
+#sequential treatment, controlling for gender.
+
+
+#1=Opioid 2=Benzodiazepines
+o_male <- cbind(rep(1,length(years)),years,male,as.numeric(od2_clean[c("Any Opioid Male"),]))
+o_female <- cbind(rep(1,length(years)),years,female,as.numeric(od2_clean[c("Any Opioid Female"),]))
+b_male <- cbind(rep(2,length(years)),years,male,as.numeric(od2_clean[c("Benzodiazepines Male"),]))
+b_female <- cbind(rep(2,length(years)),years,female,as.numeric(od2_clean[c("Benzodiazepines Female"),]))
+
+
+test2 <- data.frame(rbind(o_male,o_female,b_male,b_female))
+colnames(test2) <- c("Drug", "Year", "Female", "Deaths")
+test2
+
+test2$Year <- factor(test2$Year)
+model.o_b <- polr(Year~Drug+Female, data=test2)
+summary(model.o_b)
+
+
+#######from hw3 q2 solution########
+#So, the interpretation is: Patients undergoing alternating treatment have odds of having a better
+#disease response that are estimated to be e
+#−0.5806817 = 0.5595 times those of patients undergoing
+#sequential treatment, controlling for gender.
