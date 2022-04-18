@@ -23,10 +23,12 @@ rownames(od2_clean) <- od2_rowname
 
 library("nnet")
 library(MASS)
-years <- od_colname
+years <- seq(1:length(od_colname))
 male <- rep(0,length(years))
 female <- rep(1,length(years))
 
+
+#1=1999, 2=2000, 3=2001,...22=2022
 #1=Heroin 2=Cocaine 3=Antidepressants
 h_male <- cbind(rep(1,length(years)),years,male,as.numeric(od2_clean[c("Heroin Male"),]))
 h_female <- cbind(rep(1,length(years)),years,female,as.numeric(od2_clean[c("Heroin Female"),]))
