@@ -1,10 +1,104 @@
+library(readxl)
+od <- read_excel("C:/Users/micha/Downloads/Overdose_data_1999-2020_1.5.22.xlsx", "Rate Drug OD Deaths")
+od <- as.data.frame(od)
+od_clean <- od[5:nrow(od),]
+od_clean <- od_clean[,1:(ncol(od_clean)-2)]
+
+od_rowname <- c("Total Overdose Deaths", "Total Overdose Deaths Female", "Total Overdose Deaths Male",
+                "Any Opioid1", "Any Opioid1 Female", "Any Opioid1 Male", "Prescription Opioids2", "Prescription Opioids2 Female",
+                "Prescription Opioids2 Male", "Prescription Opioids AND Synthetic Opioids other than Methadone",
+                "Prescription Opioids WITHOUT Synthetic Opioids other than Methadone",
+                "Synthetic Opioids other than Methadone", "Synthetic Opioids other than Methadone Female",
+                "Synthetic Opioids other than Methadone Male", "Heroin", "Heroin Female", "Heroin Male",
+                "Cocaine", "Cocaine Female", "Cocaine Male", "Cocaine AND Any Opioid", "Cocaine AND Any Opioid Female",
+                "Cocaine AND Any Opioid Male", "Cocaine WITHOUT Any Opioid", "Cocaine WITHOUT Any Opioid Female", 
+                "Cocaine WITHOUT Any Opioid Male", "Psychostimulants With Abuse Potential",
+                "Psychostimulants With Abuse Potential Female", "Psychostimulants With Abuse Potential Male",
+                "Psychostimulants With Abuse Potential AND Any Opioid", "Psychostimulants With Abuse Potential WITHOUT Any Opioid",
+                "Psychostimulants With Abuse Potential WITHOUT Any Opioid Female",
+                "Psychostimulants With Abuse Potential WITHOUT Any Opioid Male", "Benzodiazepines", "Benzodiazepines Female",
+                "Benzodiazepines Male", "Benzodiazepines AND Any Opioid", "Benzodiazepines AND Any Opioid Female",
+                "Benzodiazepines AND Any Opioid Male", "Benzodiazepines WITHOUT Any Opioid",
+                "Benzodiazepines WITHOUT Any Opioid Female", "Benzodiazepines WITHOUT Any Opioid Male",
+                "Antidepressants", "Antidepressants Female", "Antidepressants Male", "Antidepressants AND Any Opioid",
+                "Antidepressants AND Any Opioid Female", "Antidepressants AND Any Opioid Male",
+                "Antidepressants WITHOUT Any Opioid",
+                "Antidepressants WITHOUT Any Opioid Female", "Antidepressants WITHOUT Any Opioid Male")
+
+od_temp1 <- od_clean[1:11,]
+od_temp2 <- od_clean[14,]
+od_temp3 <- od_clean[17:22,]
+od_temp4 <- od_clean[29:37,]
+od_temp5 <- od_clean[44:47,]
+od_temp6 <- od_clean[50:52,]
+od_temp7 <- od_clean[59:67,]
+od_temp8 <- od_clean[74:82,]
+
+od_clean <- rbind(od_temp1,od_temp2,od_temp3,od_temp4,od_temp5,od_temp6,od_temp7,od_temp8)
+od_clean <- od_clean[,2:ncol(od_clean)]
+od_colname <- as.numeric(od_clean[1,])
+od_clean <- od_clean[2:nrow(od_clean),]
+colnames(od_clean) <- od_colname
+rownames(od_clean) <- od_rowname
+
+od_clean$`1999 Rounded` <- round(od_clean$`1999`, digits = 1)
+
+od_clean_numeric <- od_clean
+
+od_clean_numeric[,1:21] <- sapply(od_clean[,1:21], as.numeric)
+
+od_clean_numeric
+
+
+library("nnet")
+library(MASS)
+years <- seq(1:length(od_colname))
+male <- rep(0,length(years))
+female <- rep(1,length(years))
+
+
+#1=1999, 2=2000, 3=2001,...22=2022
+#1=Heroin 2=Cocaine 3=Antidepressants
+h_male <- cbind(rep(1,length(years)),years,male,as.numeric(od_clean_numeric[c("Heroin Male"),]))
+h_female <- cbind(rep(1,length(years)),years,female,as.numeric(od_clean_numeric[c("Heroin Female"),]))
+c_male <- cbind(rep(2,length(years)),years,male,as.numeric(od_clean_numeric[c("Cocaine Male"),]))
+c_female <- cbind(rep(2,length(years)),years,female,as.numeric(od_clean_numeric[c("Cocaine Female"),]))
+a_male <- cbind(rep(3,length(years)),years,male,as.numeric(od_clean_numeric[c("Antidepressants Male"),]))
+a_female <- cbind(rep(3,length(years)),years,female,as.numeric(od_clean_numeric[c("Antidepressants Female"),]))
+
+test1 <- data.frame(rbind(h_male,h_female,c_male,c_female,a_male,a_female))
+colnames(test1) <- c("Drug", "Year", "Female", "Deaths")
+
+# test1$Year <- factor(test1$Year)
+test1$Drug <- factor(test1$Drug)
+model.c_v_a <- lm(Deaths~Drug+Female, data=test1)
+summary(model.c_v_a)
+
 test1_h <- filter(test1, Drug == 2); test1_h
 model.h <- lm(Deaths~Year+Female, data=test1_h)
 summary(model.h)
 
+plot(Deaths~Year, data = test1_h_poly) +
+  lines(sort(test1_h_poly$Year), fitted(model.h)[order(test1_h_poly$Year)], col='red', type='p')
 
-ggplot(data = test1_h, aes(x = Year, y = Deaths), color = Female) + 
-  geom_point() + stat_smooth(method = "lm", col = "red")
+model_h_2 <- lm(Deaths~Year*Female, data=test1_h)
+summary(model_h_2)
+
+plot(Deaths~Year, data = test1_h_poly) +
+  lines(sort(test1_h_poly$Year), fitted(model_h_2)[order(test1_h_poly$Year)], col='red', type='p')
+
+
+model_h_3 <- lm(Deaths~Year*Female-Female, data=test1_h)
+summary(model_h_3)
+
+plot(Deaths~Year, data = test1_h_poly) +
+  lines(sort(test1_h_poly$Year), fitted(model_h_3)[order(test1_h_poly$Year)], col='red', type='p')
+
+
+
+
+# ggplot(data = test1_h, aes(x = Year, y = Deaths), color = Female) +
+#   geom_point() + stat_smooth(method = "lm", col = "red")
 
 test1_h_poly <- test1_h %>% mutate(Year2 = Year^2, Year3 = Year^3, Year4 = Year^4)
 model_h_poly4 <- lm(Deaths~Year + Year2 + Year3 + Year4 + Female, data = test1_h_poly)
@@ -29,19 +123,8 @@ plot(Deaths~Year, data = test1_h_poly) +
 
 
 
-model_h_2 <- lm(Deaths~Year*Female, data=test1_h)
-summary(model_h_2)
-
-plot(Deaths~Year, data = test1_h_poly) +
-  lines(sort(test1_h_poly$Year), fitted(model_h_2)[order(test1_h_poly$Year)], col='red', type='p')
-
-
-model_h_3 <- lm(Deaths~Year*Female-Female, data=test1_h)
-summary(model_h_3)
-
-plot(Deaths~Year, data = test1_h_poly) +
-  lines(sort(test1_h_poly$Year), fitted(model_h_3)[order(test1_h_poly$Year)], col='red', type='p')
-
 
 anova(model.h,model_h_3,model_h_2, test="Chisq")
 anova(model_h_poly4,model_h_poly3f,model_h_poly5f, test="Chisq")
+
+
