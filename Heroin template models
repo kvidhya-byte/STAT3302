@@ -1,0 +1,47 @@
+test1_h <- filter(test1, Drug == 2); test1_h
+model.h <- lm(Deaths~Year+Female, data=test1_h)
+summary(model.h)
+
+
+ggplot(data = test1_h, aes(x = Year, y = Deaths), color = Female) + 
+  geom_point() + stat_smooth(method = "lm", col = "red")
+
+test1_h_poly <- test1_h %>% mutate(Year2 = Year^2, Year3 = Year^3, Year4 = Year^4)
+model_h_poly4 <- lm(Deaths~Year + Year2 + Year3 + Year4 + Female, data = test1_h_poly)
+summary(model_h_poly4)
+
+plot(Deaths~Year, data = test1_h_poly) +
+  lines(sort(test1_h_poly$Year), fitted(model_h_poly4)[order(test1_h_poly$Year)], col='red', type='p')
+
+
+model_h_poly3f <- lm(Deaths~Year + Year2 + Year3 + Year3:Female + Female, data = test1_h_poly)
+summary(model_h_poly3f)
+
+plot(Deaths~Year, data = test1_h_poly) +
+  lines(sort(test1_h_poly$Year), fitted(model_h_poly3f)[order(test1_h_poly$Year)], col='red', type='p')
+
+
+model_h_poly5f <- lm(Deaths~Year + Year2 + Year3 + Year4 + I(Year^5) + Year3:Female + Female, data = test1_h_poly)
+summary(model_h_poly5f)
+
+plot(Deaths~Year, data = test1_h_poly) +
+  lines(sort(test1_h_poly$Year), fitted(model_h_poly5f)[order(test1_h_poly$Year)], col='red', type='p')
+
+
+
+model_h_2 <- lm(Deaths~Year*Female, data=test1_h)
+summary(model_h_2)
+
+plot(Deaths~Year, data = test1_h_poly) +
+  lines(sort(test1_h_poly$Year), fitted(model_h_2)[order(test1_h_poly$Year)], col='red', type='p')
+
+
+model_h_3 <- lm(Deaths~Year*Female-Female, data=test1_h)
+summary(model_h_3)
+
+plot(Deaths~Year, data = test1_h_poly) +
+  lines(sort(test1_h_poly$Year), fitted(model_h_3)[order(test1_h_poly$Year)], col='red', type='p')
+
+
+anova(model.h,model_h_3,model_h_2, test="Chisq")
+anova(model_h_poly4,model_h_poly3f,model_h_poly5f, test="Chisq")
