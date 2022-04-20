@@ -1,0 +1,71 @@
+
+## don't have a great explanation, just happened to find this and it works so uhh no questions asked ##
+## b0, m0 are intercept/slope for male basic linear ; b1,m1 -> female basic linear ##
+model_c_yr <- test1_h %>% nest(data = -Female) %>% mutate(model = map(data, ~lm(Deaths ~ Year, data = .)), tidied = map(model, tidy)) %>% unnest(tidied)
+b0 <- model_c_yr[[5]][1]
+m0 <- model_c_yr[[5]][2]
+b1 <- model_c_yr[[5]][3]
+m1 <- model_c_yr[[5]][4]
+
+
+## can do the same with poly's using functions which can be plotted ! #epic ##
+test1_h_poly <- test1_h %>% mutate(Year2 = Year^2, Year3 = Year^3, Year4 = Year^4, Year5 = Year^5)
+
+model_c_yr4 <- test1_h_poly %>% nest(data = -Female) %>% mutate(model = map(data, ~lm(Deaths ~ Year + Year2 + Year3 + Year4, data = .)), tidied = map(model, tidy)) %>% unnest(tidied)
+b_m_4 <- model_c_yr4[[5]][1]
+yr_m_4 <- model_c_yr4[[5]][2]
+yr2_m_4 <- model_c_yr4[[5]][3]
+yr3_m_4 <- model_c_yr4[[5]][4]
+yr4_m_4 <- model_c_yr4[[5]][5]
+f4_m <- function(Year) b_m_4 + yr_m_4*Year + yr2_m_4*Year^2 + yr3_m_4*Year^3 + yr4_m_4*Year^4
+
+b_f_4 <- model_c_yr4[[5]][6]
+yr_f_4 <- model_c_yr4[[5]][7]
+yr2_f_4 <- model_c_yr4[[5]][8]
+yr3_f_4 <- model_c_yr4[[5]][9]
+yr4_f_4 <- model_c_yr4[[5]][10]
+f4_f <- function(Year) b_f_4 + yr_f_4*Year + yr2_f_4*Year^2 + yr3_f_4*Year^3 + yr4_f_4*Year^4
+
+
+model_c_yr3 <- test1_h_poly %>% nest(data = -Female) %>% mutate(model = map(data, ~lm(Deaths ~ Year + Year2 + Year3, data = .)), tidied = map(model, tidy)) %>% unnest(tidied)
+b_m_3 <- model_c_yr3[[5]][1]
+yr_m_3 <- model_c_yr3[[5]][2]
+yr2_m_3 <- model_c_yr3[[5]][3]
+yr3_m_3 <- model_c_yr3[[5]][4]
+f3_m <- function(Year) b_m_3 + yr_m_3*Year + yr2_m_3*Year^2 + yr3_m_3*Year^3
+
+b_f_3 <- model_c_yr3[[5]][5]
+yr_f_3 <- model_c_yr3[[5]][6]
+yr2_f_3 <- model_c_yr3[[5]][7]
+yr3_f_3 <- model_c_yr3[[5]][8]
+f3_f <- function(Year) b_f_3 + yr_f_3*Year + yr2_f_3*Year^2 + yr3_f_3*Year^3
+
+
+model_c_yr5 <- test1_h_poly %>% nest(data = -Female) %>% mutate(model = map(data, ~lm(Deaths ~ Year + Year2 + Year3 + Year4 + Year5, data = .)), tidied = map(model, tidy)) %>% unnest(tidied)
+b_m_5 <- model_c_yr5[[5]][1]
+yr_m_5 <- model_c_yr5[[5]][2]
+yr2_m_5 <- model_c_yr5[[5]][3]
+yr3_m_5 <- model_c_yr5[[5]][4]
+yr4_m_5 <- model_c_yr5[[5]][5]
+yr5_m_5 <- model_c_yr5[[5]][6]
+f5_m <- function(Year) b_m_5 + yr_m_5*Year + yr2_m_5*Year^2 + yr3_m_5*Year^3 + yr4_m_5*Year^4 + yr5_m_5*Year^5
+
+b_f_5 <- model_c_yr5[[5]][7]
+yr_f_5 <- model_c_yr5[[5]][8]
+yr2_f_5 <- model_c_yr5[[5]][9]
+yr3_f_5 <- model_c_yr5[[5]][10]
+yr4_f_5 <- model_c_yr5[[5]][11]
+yr5_f_5 <- model_c_yr5[[5]][12]
+f5_f <- function(Year) b_f_5 + yr_f_5*Year + yr2_f_5*Year^2 + yr3_f_5*Year^3 + yr4_f_5*Year^4 + yr5_f_5*Year^5
+
+
+## g1 plot same as before ##
+g1<-ggplot(test1_h)+ aes(Year,Deaths, color = Female) + ggtitle("Cocaine Overdose Deathrate MvsF 1999-2020")+ 
+  geom_line(data = subset(test1_h, Female == 0), type = 'l', size=1.2) +
+  geom_line(data = subset(test1_h, Female == 1), type = 'l', size=1.2)
+
+## new plots with fitted lines##
+g1 + geom_abline(intercept = b0,slope = m0,color="orange",size = 1.1) + geom_abline(intercept = b1,slope = m1,color="orange",size = 1.1)
+g1 + stat_function(fun=f3_m,color="red",size = 1.2) + stat_function(fun=f3_f,color="red",size = 1.2)
+g1 + stat_function(fun=f4_m,color="green",size = 1.2) + stat_function(fun=f4_f,color="green",size = 1.2)
+g1 + stat_function(fun=f5_m,color="pink",size = 1.2) + stat_function(fun=f5_f,color="pink",size = 1.2)
